@@ -9,19 +9,32 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.korilin.concentration_detection.databinding.ConcentrationTimeSelectorBinding
+import com.korilin.concentration_detection.viewmodel.ConcentrationViewModel
 
 class ConcentrationTimeSelector : Fragment() {
 
     private var columnCount: Int = 2
     private val selectorItems = listOf(
-        SelectorItem(30, "30 min"),
-        SelectorItem(60, "60 min"),
-        SelectorItem(90, "90 min"),
+        SelectorItem(30 * 60, "30 min"),
+        SelectorItem(60 * 60, "60 min"),
+        SelectorItem(90 * 60, "90 min"),
+        SelectorItem(0 * 60, "custom") { selected, selectorList, position ->
+            selected?.buttonSetNoSelected()
+            selectorList[position].apply {
+                content = "120 min"
+                value = 120 * 60
+            }.also {
+                text = it.content
+            }
+            buttonSetSelected()
+            this
+        }
     )
 
     private lateinit var selectorViewBinding: ConcentrationTimeSelectorBinding
 
     private lateinit var selectorRecyclerView: RecyclerView
+
 
     /**
      * A  [E/RecyclerView: No adapter attached; skipping layout] note
@@ -39,7 +52,9 @@ class ConcentrationTimeSelector : Fragment() {
         selectorRecyclerView = selectorViewBinding.selectorRecyclerView.apply {
             // activity [getActivity] or context [this.getContext] ? How to choice
             // I see someone using getActivity() as content
-            layoutManager = GridLayoutManager(activity, columnCount).apply {
+            layoutManager = object : GridLayoutManager(activity, columnCount) {
+                override fun canScrollVertically() = false
+            }.apply {
                 offsetChildrenHorizontal(100)
             }
             adapter = SelectorAdapter(selectorItems)
@@ -54,7 +69,7 @@ class ConcentrationTimeSelector : Fragment() {
                     outRect.apply {
                         bottom = span
                         right = span * 2
-                        left = span *2
+                        left = span * 2
                         top = span
                     }
                 }

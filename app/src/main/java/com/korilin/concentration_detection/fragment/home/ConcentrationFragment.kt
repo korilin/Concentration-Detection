@@ -5,7 +5,12 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.korilin.concentration_detection.R
+import com.korilin.concentration_detection.databinding.FragmentConcentrationBinding
+import com.korilin.concentration_detection.viewmodel.ConcentrationViewModel
 
 /**
  * A simple [Fragment] subclass.
@@ -14,16 +19,26 @@ import com.korilin.concentration_detection.R
  */
 class ConcentrationFragment : HomeTabLayoutFragment() {
 
+    lateinit var viewBinding: FragmentConcentrationBinding
+    lateinit var viewModel: ViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        viewModel = ViewModelProvider(this).get(ConcentrationViewModel::class.java)
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
+        viewBinding = FragmentConcentrationBinding.inflate(inflater)
+        viewBinding.startButton.apply {
+            setOnClickListener {
+
+            }
+        }
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_concentration, container, false)
+        return viewBinding.root
     }
 
     companion object {

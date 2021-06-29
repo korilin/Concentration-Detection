@@ -9,7 +9,21 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.korilin.concentration_detection.R
 
-data class SelectorItem(val value: Int, val content: String, val click: (() -> Unit)? = null)
+data class SelectorItem(
+    var value: Int,
+    var content: String,
+    val click: (Button.(Button?, List<SelectorItem>, Int) -> Button?)? = null
+)
+
+fun Button.buttonSetNoSelected() {
+    setTextColor(ContextCompat.getColor(context, R.color.f1))
+    setBackgroundResource(R.drawable.concentration_time_no_selected_button)
+}
+
+fun Button.buttonSetSelected() {
+    setTextColor(Color.WHITE)
+    setBackgroundResource(R.drawable.concentration_time_selected_button)
+}
 
 class SelectorAdapter(
     private val selectorList: List<SelectorItem>
@@ -30,19 +44,16 @@ class SelectorAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.selectorButton.apply {
             text = selectorList[position].content
+            val click = selectorList[position].click
             setOnClickListener {
-                selected = if (this == selected) {
-                    setTextColor(ContextCompat.getColor(context, R.color.f1))
-                    setBackgroundResource(R.drawable.concentration_time_no_selected_button)
-                    null
-                } else {
-                    selected?.let {
-                        it.setTextColor(ContextCompat.getColor(context, R.color.f1))
-                        it.setBackgroundResource(R.drawable.concentration_time_no_selected_button)
+                selected = when {
+                    click != null -> click(this, selected, selectorList, position)
+                    this == selected -> buttonSetNoSelected().run { null }
+                    else -> {
+                        selected?.buttonSetNoSelected()
+                        buttonSetSelected()
+                        this
                     }
-                    setTextColor(Color.WHITE)
-                    setBackgroundResource(R.drawable.concentration_time_selected_button)
-                    this
                 }
             }
         }
