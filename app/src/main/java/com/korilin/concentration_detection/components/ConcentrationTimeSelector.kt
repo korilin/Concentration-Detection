@@ -1,11 +1,14 @@
 package com.korilin.concentration_detection.components
 
+import android.app.TimePickerDialog
 import android.graphics.Rect
 import android.os.Bundle
+import android.text.format.DateFormat
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.korilin.concentration_detection.databinding.ConcentrationTimeSelectorBinding
@@ -20,13 +23,22 @@ class ConcentrationTimeSelector : Fragment() {
         SelectorItem(90 * 60, "90 min"),
         SelectorItem(0 * 60, "custom") { selected, selectorList, position ->
             selected?.buttonSetNoSelected()
-            selectorList[position].apply {
-                content = "120 min"
-                value = 120 * 60
-            }.also {
-                text = it.content
-            }
-            buttonSetSelected()
+            TimePickerDialog(
+                activity,
+                { _, hourOfDay, minute ->
+                    val min = hourOfDay * 60 + minute
+                    selectorList[position].apply {
+                        content = "$min min"
+                        value = min * 60
+                    }.also {
+                        text = it.content
+                        viewModel.time = it.value
+                    }
+                    buttonSetSelected()
+                }, 0, 0, true
+            ).apply {
+                setTitle("Set concentration time")
+            }.show()
             this
         }
     )
@@ -35,6 +47,13 @@ class ConcentrationTimeSelector : Fragment() {
 
     private lateinit var selectorRecyclerView: RecyclerView
 
+    /**
+     * get parent Fragment ViewModel, 原理未知
+     * this solution comes from stackOverflow:
+     *
+     * [https://stackoverflow.com/questions/59952673/how-to-get-an-instance-of-viewmodel-in-activity-in-2020-21]
+     */
+    private val viewModel: ConcentrationViewModel by viewModels(ownerProducer = { requireParentFragment() })
 
     /**
      * A  [E/RecyclerView: No adapter attached; skipping layout] note
@@ -57,7 +76,7 @@ class ConcentrationTimeSelector : Fragment() {
             }.apply {
                 offsetChildrenHorizontal(100)
             }
-            adapter = SelectorAdapter(selectorItems)
+            adapter = SelectorAdapter(selectorItems, viewModel)
 
             // set items padding, base with [columnCount] is 2
             addItemDecoration(object : RecyclerView.ItemDecoration() {

@@ -8,6 +8,7 @@ import android.widget.Button
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.korilin.concentration_detection.R
+import com.korilin.concentration_detection.viewmodel.ConcentrationViewModel
 
 data class SelectorItem(
     var value: Int,
@@ -26,7 +27,8 @@ fun Button.buttonSetSelected() {
 }
 
 class SelectorAdapter(
-    private val selectorList: List<SelectorItem>
+    private val selectorList: List<SelectorItem>,
+    private var viewModel: ConcentrationViewModel
 ) : RecyclerView.Adapter<SelectorAdapter.ViewHolder>() {
 
     private var selected: Button? = null
@@ -43,11 +45,16 @@ class SelectorAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.selectorButton.apply {
-            text = selectorList[position].content
-            val click = selectorList[position].click
+            val customClick: (Button.(Button?, List<SelectorItem>, Int) -> Button?)?
+            var time: Int
+            selectorList[position].apply {
+                text = content
+                customClick = click
+                time = value
+            }
             setOnClickListener {
                 selected = when {
-                    click != null -> click(this, selected, selectorList, position)
+                    customClick != null -> customClick(this, selected, selectorList, position)
                     this == selected -> buttonSetNoSelected().run { null }
                     else -> {
                         selected?.buttonSetNoSelected()
@@ -55,6 +62,7 @@ class SelectorAdapter(
                         this
                     }
                 }
+                viewModel.time = if (selected != null) time else 0
             }
         }
     }
