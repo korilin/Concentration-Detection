@@ -46,11 +46,9 @@ class SelectorAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.selectorButton.apply {
             val customClick: (Button.(Button?, List<SelectorItem>, Int) -> Button?)?
-            var time: Int
             selectorList[position].apply {
                 text = content
                 customClick = click
-                time = value
             }
             setOnClickListener {
                 selected = when {
@@ -62,7 +60,7 @@ class SelectorAdapter(
                         this
                     }
                 }
-                viewModel.time = if (selected != null) time else 0
+                viewModel.time = if (selected != null) selectorList[position].value else 0
             }
         }
     }

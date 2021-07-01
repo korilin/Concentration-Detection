@@ -12,8 +12,17 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.korilin.concentration_detection.databinding.ConcentrationTimeSelectorBinding
+import com.korilin.concentration_detection.fragment.home.ConcentrationFragment
 import com.korilin.concentration_detection.viewmodel.ConcentrationViewModel
 
+/**
+ * 这是一个时间选择器
+ *
+ * - 基于 RecycleView 实现
+ * - 使用父 Fragment 的 ViewModel 来共享选择的时间值
+ *
+ * @see ConcentrationFragment
+ */
 class ConcentrationTimeSelector : Fragment() {
 
     private var columnCount: Int = 2
@@ -23,6 +32,10 @@ class ConcentrationTimeSelector : Fragment() {
         SelectorItem(90 * 60, "90 min"),
         SelectorItem(0 * 60, "custom") { selected, selectorList, position ->
             selected?.buttonSetNoSelected()
+            selectorList[position].apply {
+                content = "custom"
+                value = 0
+            }
             TimePickerDialog(
                 activity,
                 { _, hourOfDay, minute ->
@@ -37,7 +50,7 @@ class ConcentrationTimeSelector : Fragment() {
                     buttonSetSelected()
                 }, 0, 0, true
             ).apply {
-                setTitle("Set concentration time")
+                setTitle("Set Custom Concentration Time")
             }.show()
             this
         }
