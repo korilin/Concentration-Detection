@@ -38,11 +38,11 @@ class TimeCountDownActivity : AppCompatActivity() {
                 }
                 AIRPLANE_OPENED -> viewBinding.flyModeStatus.apply {
                     text = getString(R.string.airplane_mode_opened)
-                    setTextColor(getColor(R.color.error))
+                    setTextColor(getColor(R.color.success))
                 }
                 AIRPLANE_CLOSED -> viewBinding.flyModeStatus.apply {
                     text = getString(R.string.network_closed)
-                    setTextColor(getColor(R.color.success))
+                    setTextColor(getColor(R.color.error))
                 }
             }
         }
@@ -70,7 +70,7 @@ class TimeCountDownActivity : AppCompatActivity() {
         override fun onReceive(context: Context, intent: Intent) {
             println(intent.action)
             if (intent.action == Intent.ACTION_AIRPLANE_MODE_CHANGED) {
-                if (intent.getBooleanExtra(intent.action, false)) {
+                if (intent.getBooleanExtra("state", false)) {
                     uiHandel.sendMessage(Message().apply { what = AIRPLANE_OPENED })
                 } else {
                     uiHandel.sendMessage(Message().apply { what = AIRPLANE_CLOSED })
