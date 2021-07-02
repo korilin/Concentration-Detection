@@ -9,7 +9,9 @@
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="wait_image">wait image</string>
     <string name="airplane_mode_label">Airplane mode:</string>
-    <string name="opened">opened</string>
-    <string name="closed">closed</string>
-    <string name="wifi_status_label">WIFI:</string>
+    <string name="airplane_mode_opened">opened</string>
+    <string name="airplane_mode_closed">closed</string>
+    <string name="network_status_label">Network:</string>
+    <string name="network_connected">connected</string>
+    <string name="network_closed">closed</string>
 </resources>

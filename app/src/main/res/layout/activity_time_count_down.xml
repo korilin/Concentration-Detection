@@ -41,8 +41,8 @@
                     android:contentDescription="" />
 
             <TextView
-                    android:labelFor="@id/wifiStatus"
-                    android:text="@string/wifi_status_label"
+                    android:labelFor="@id/networkStatus"
+                    android:text="@string/network_status_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingHorizontal="15sp"
@@ -58,15 +58,15 @@
 
             <TextView
                     android:id="@+id/flyModeStatus"
-                    tools:text="opened"
+                    tools:text="@string/airplane_mode_opened"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingHorizontal="15sp"
                     android:paddingVertical="5sp" />
 
             <TextView
-                    android:id="@+id/wifiStatus"
-                    tools:text="opened"
+                    android:id="@+id/networkStatus"
+                    tools:text="@string/network_connected"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingHorizontal="15sp"
