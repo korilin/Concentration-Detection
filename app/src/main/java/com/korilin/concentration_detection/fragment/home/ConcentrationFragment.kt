@@ -1,15 +1,22 @@
 package com.korilin.concentration_detection.fragment.home
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContract
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.korilin.concentration_detection.R
+import com.korilin.concentration_detection.TimeCountDownActivity
 import com.korilin.concentration_detection.components.ConcentrationTimeSelector
 import com.korilin.concentration_detection.databinding.FragmentConcentrationBinding
 import com.korilin.concentration_detection.viewmodel.ConcentrationViewModel
@@ -30,14 +37,15 @@ import com.korilin.concentration_detection.viewmodel.ConcentrationViewModel
  */
 class ConcentrationFragment : HomeTabLayoutFragment() {
 
-    lateinit var viewBinding: FragmentConcentrationBinding
-    lateinit var viewModel: ConcentrationViewModel
+    private lateinit var viewBinding: FragmentConcentrationBinding
+    private lateinit var viewModel: ConcentrationViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel = ViewModelProvider(this).get(ConcentrationViewModel::class.java)
     }
 
+    @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -49,10 +57,17 @@ class ConcentrationFragment : HomeTabLayoutFragment() {
                     Toast.makeText(
                         activity, "Please select concentration time!", Toast.LENGTH_LONG
                     ).show()
-                else{
-                    Toast.makeText(
-                        activity, "${viewModel.time}", Toast.LENGTH_LONG
-                    ).show()
+                else {
+                    try {
+                        startActivity(Intent(Settings.Panel.ACTION_INTERNET_CONNECTIVITY))
+                    } catch (ane: ActivityNotFoundException) {
+                        Toast.makeText(
+                            activity,
+                            "Be sure to adjust your internet, volume, and other settings!",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                    TimeCountDownActivity.actionStart(requireActivity(), viewModel.time)
                 }
             }
         }
@@ -62,14 +77,7 @@ class ConcentrationFragment : HomeTabLayoutFragment() {
     }
 
     companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @return A new instance of fragment ConcentrationFragment.
-         */
         @JvmStatic
-        fun newInstance() =
-            ConcentrationFragment()
+        fun newInstance() = ConcentrationFragment()
     }
 }

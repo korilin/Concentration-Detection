@@ -7,4 +7,9 @@
     <string name="title_activity_time_count_down">FullscreenActivity</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="wait_image">wait image</string>
+    <string name="airplane_mode_label">Airplane mode:</string>
+    <string name="opened">opened</string>
+    <string name="closed">closed</string>
+    <string name="wifi_status_label">WIFI:</string>
 </resources>
