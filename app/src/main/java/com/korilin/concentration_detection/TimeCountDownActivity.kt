@@ -7,6 +7,7 @@ import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.net.Network
 import android.os.*
+import android.provider.Settings
 import androidx.appcompat.app.AppCompatActivity
 import com.korilin.concentration_detection.databinding.ActivityTimeCountDownBinding
 
@@ -58,9 +59,16 @@ class TimeCountDownActivity : AppCompatActivity() {
         }
     }
 
-    // A Airplane Receiver
+    //
+    /**
+     * A [Intent.ACTION_AIRPLANE_MODE_CHANGED] Receiver
+     *
+     * Account to my test, this receiver will receive a message when it was just registered.
+     * So there use contentResolver to get the current state of the Airplane in [onCreate] fun.
+     */
     private val airplaneReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
+            println(intent.action)
             if (intent.action == Intent.ACTION_AIRPLANE_MODE_CHANGED) {
                 if (intent.getBooleanExtra(intent.action, false)) {
                     uiHandel.sendMessage(Message().apply { what = AIRPLANE_OPENED })
@@ -94,13 +102,30 @@ class TimeCountDownActivity : AppCompatActivity() {
             }
         }
 
+        /**
+         * Because [airplaneReceiver] could not receive the airplane state at the beginning of the registration,
+         * So here use contentResolver to get the current state of the Airplane.
+         */
+        val airplaneModeStatus =
+            Settings.Global.getInt(contentResolver, Settings.Global.AIRPLANE_MODE_ON, 0)
+
+        viewBinding.flyModeStatus.apply {
+            if (airplaneModeStatus == 0) {
+                text = getString(R.string.airplane_mode_opened)
+                setTextColor(getColor(R.color.error))
+            } else {
+                text = getString(R.string.airplane_mode_closed)
+                setTextColor(getColor(R.color.success))
+            }
+        }
+
         connectivityManager = getSystemService(ConnectivityManager::class.java).apply {
             registerDefaultNetworkCallback(networkCallback)
         }
 
         registerReceiver(airplaneReceiver, IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED))
 
-        // 关掉 Action Bar
+        // hide Action Bar, but this code no effective!
         actionBar?.hide()
         setContentView(viewBinding.root)
         countDownTimer.start()
