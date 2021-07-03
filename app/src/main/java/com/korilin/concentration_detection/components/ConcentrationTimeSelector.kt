@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.korilin.concentration_detection.R
 import com.korilin.concentration_detection.databinding.ConcentrationTimeSelectorBinding
 import com.korilin.concentration_detection.fragment.home.ConcentrationFragment
 import com.korilin.concentration_detection.viewmodel.ConcentrationViewModel
@@ -26,35 +27,8 @@ import com.korilin.concentration_detection.viewmodel.ConcentrationViewModel
 class ConcentrationTimeSelector : Fragment() {
 
     private var columnCount: Int = 2
-    private val selectorItems = listOf(
-        SelectorItem(30 * 60, "30 min"),
-        SelectorItem(60 * 60, "60 min"),
-        SelectorItem(90 * 60, "90 min"),
-        SelectorItem(0 * 60, "custom") { selected, selectorList, position ->
-            selected?.buttonSetNoSelected()
-            selectorList[position].apply {
-                content = "custom"
-                value = 0
-            }
-            TimePickerDialog(
-                activity,
-                { _, hourOfDay, minute ->
-                    val min = hourOfDay * 60 + minute
-                    selectorList[position].apply {
-                        content = "$min min"
-                        value = min * 60
-                    }.also {
-                        text = it.content
-                        viewModel.time = it.value
-                    }
-                    buttonSetSelected()
-                }, 0, 0, true
-            ).apply {
-                setTitle("Set Custom Concentration Time")
-            }.show()
-            this
-        }
-    )
+
+    private lateinit var selectorItems: List<SelectorItem>
 
     private lateinit var selectorViewBinding: ConcentrationTimeSelectorBinding
 
@@ -67,6 +41,44 @@ class ConcentrationTimeSelector : Fragment() {
      * [https://stackoverflow.com/questions/59952673/how-to-get-an-instance-of-viewmodel-in-activity-in-2020-21]
      */
     private val viewModel: ConcentrationViewModel by viewModels(ownerProducer = { requireParentFragment() })
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        // use resource string to support local language、
+        val timeMin = getString(R.string.time_min)
+        val customString = getString(R.string.customString)
+
+        selectorItems = listOf(
+            SelectorItem(30 * 60, "30 $timeMin"),
+            SelectorItem(60 * 60, "60 $timeMin"),
+            SelectorItem(90 * 60, "90 $timeMin"),
+            SelectorItem(0 * 60, customString) { selected, selectorList, position ->
+                selected?.buttonSetNoSelected()
+                selectorList[position].apply {
+                    content = customString
+                    value = 0
+                }
+                TimePickerDialog(
+                    activity,
+                    { _, hourOfDay, minute ->
+                        val min = hourOfDay * 60 + minute
+                        selectorList[position].apply {
+                            content = "$min $timeMin"
+                            value = min * 60
+                        }.also {
+                            text = it.content
+                            viewModel.time = it.value
+                        }
+                        buttonSetSelected()
+                    }, 0, 0, true
+                ).apply {
+                    setTitle(getString(R.string.custom_time_select_title))
+                }.show()
+                this
+            }
+        )
+    }
 
     /**
      * A  [E/RecyclerView: No adapter attached; skipping layout] note

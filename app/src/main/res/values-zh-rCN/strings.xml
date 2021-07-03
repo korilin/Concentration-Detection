@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">专注检测</string>
+    <string name="concentration_start">开始专注</string>
+    <string name="concentration_select_title">选择专注时间</string>
+    <string name="wait_image">专注图片</string>
+    <string name="airplane_mode_label">飞行模式</string>
+    <string name="airplane_mode_opened">已打开</string>
+    <string name="airplane_mode_closed">已关闭</string>
+    <string name="network_status_label">网络</string>
+    <string name="network_connected">已连接</string>
+    <string name="network_closed">未连接</string>
+    <string name="time_min">分</string>
+    <string name="customString">自定义</string>
+    <string name="custom_time_select_title">自定义专注时间</string>
+    <string name="select_concentration_time_message">请选择专注时长！</string>
+    <string name="be_sure_concentration_settings">记得调整你的网络、音量等设置哦！</string>
+    <string name="concentration_tab_name">专注</string>
+    <string name="statistics_tab_name">统计</string>
+</resources>

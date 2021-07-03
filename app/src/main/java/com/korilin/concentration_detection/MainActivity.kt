@@ -1,5 +1,6 @@
 package com.korilin.concentration_detection
 
+import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -10,7 +11,7 @@ import com.korilin.concentration_detection.databinding.ActivityMainBinding
 import com.korilin.concentration_detection.fragment.home.ConcentrationFragment
 import com.korilin.concentration_detection.fragment.home.StatisticsFragment
 
-val tabName = arrayOf("Concentration", "Statistics")
+val tabName = arrayOf(R.string.concentration_tab_name, R.string.statistics_tab_name)
 
 /**
  *
@@ -34,7 +35,7 @@ class MainActivity : FragmentActivity() {
         homeViewPager.adapter = HomeViewPager2Adapter(this)
 
         TabLayoutMediator(homeTabLayout, homeViewPager) { tab, position ->
-            tab.text = tabName[position]
+            tab.text = getString(tabName[position])
         }.attach()
     }
 

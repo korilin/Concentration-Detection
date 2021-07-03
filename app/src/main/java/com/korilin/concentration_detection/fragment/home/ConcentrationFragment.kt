@@ -55,7 +55,7 @@ class ConcentrationFragment : HomeTabLayoutFragment() {
             setOnClickListener {
                 if (viewModel.time == 0)
                     Toast.makeText(
-                        activity, "Please select concentration time!", Toast.LENGTH_LONG
+                        activity, getString(R.string.select_concentration_time_message), Toast.LENGTH_LONG
                     ).show()
                 else {
                     try {
@@ -63,7 +63,7 @@ class ConcentrationFragment : HomeTabLayoutFragment() {
                     } catch (ane: ActivityNotFoundException) {
                         Toast.makeText(
                             activity,
-                            "Be sure to adjust your internet, volume, and other settings!",
+                            getString(R.string.be_sure_concentration_settings),
                             Toast.LENGTH_LONG
                         ).show()
                     }

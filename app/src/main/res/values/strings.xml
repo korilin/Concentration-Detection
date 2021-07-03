@@ -1,12 +1,7 @@
 <resources>
     <string name="app_name">Concentration Detection</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="concentration_start">Start</string>
     <string name="concentration_select_title">Select concentration time</string>
-    <string name="title_activity_time_count_down">FullscreenActivity</string>
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="wait_image">wait image</string>
     <string name="airplane_mode_label">Airplane mode:</string>
     <string name="airplane_mode_opened">opened</string>
@@ -14,4 +9,11 @@
     <string name="network_status_label">Network:</string>
     <string name="network_connected">connected</string>
     <string name="network_closed">closed</string>
+    <string name="time_min">min</string>
+    <string name="customString">custom</string>
+    <string name="custom_time_select_title">Custom Concentration Time</string>
+    <string name="select_concentration_time_message">Please select concentration time!</string>
+    <string name="be_sure_concentration_settings">Be sure to adjust your internet, volume, and other settings!</string>
+    <string name="concentration_tab_name">CONCENTRATION</string>
+    <string name="statistics_tab_name">STATISTICS</string>
 </resources>

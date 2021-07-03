@@ -8,7 +8,10 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.os.*
 import android.provider.Settings
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import com.korilin.concentration_detection.databinding.ActivityTimeCountDownBinding
 
 const val PARAM = "time"
@@ -125,10 +128,29 @@ class TimeCountDownActivity : AppCompatActivity() {
 
         registerReceiver(airplaneReceiver, IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED))
 
-        // hide Action Bar, but this code no effective!
-        actionBar?.hide()
         setContentView(viewBinding.root)
         countDownTimer.start()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            // I don't about this
+            // https://stackoverflow.com/questions/62577645/android-view-view-systemuivisibility-deprecated-what-is-the-replacement
+            window.setDecorFitsSystemWindows(false)
+        } else {
+            //  older sdk version settings
+            // https://developer.android.com/training/system-ui/immersive?hl=zh-cn
+            window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_IMMERSIVE
+                    // Set the content to appear under the system bars so that the
+                    // content doesn't resize when the system bars hide and show.
+                    or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    // Hide the nav bar and status bar
+                    or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    or View.SYSTEM_UI_FLAG_FULLSCREEN)
+        }
     }
 
     override fun onDestroy() {
@@ -138,6 +160,9 @@ class TimeCountDownActivity : AppCompatActivity() {
     }
 
     companion object {
+        /**
+         * Use this function to start [TimeCountDownActivity] to ensure that it has the correct params.
+         */
         fun actionStart(context: Context, time: Int) {
             context.startActivity(Intent(context, TimeCountDownActivity::class.java).apply {
                 putExtra(PARAM, time)
