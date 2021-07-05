@@ -14,4 +14,13 @@
         <!-- Customize your theme here. -->
     </style>
 
+    <style name="FullScreenNoBarTheme" parent="Theme.Design.Light.NoActionBar">
+
+    </style>
+
+    <style name="Theme.CustomTheme" parent="Theme.AppCompat.Light">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
 </resources>

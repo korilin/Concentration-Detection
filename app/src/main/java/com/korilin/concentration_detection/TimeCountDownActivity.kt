@@ -9,6 +9,7 @@ import android.net.Network
 import android.os.*
 import android.provider.Settings
 import android.view.View
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -87,6 +88,11 @@ class TimeCountDownActivity : AppCompatActivity() {
         val time = intent.getIntExtra(PARAM, 0)
         viewBinding = ActivityTimeCountDownBinding.inflate(layoutInflater)
 
+        val finishDialog = AlertDialog.Builder(this).apply {
+            setTitle(R.string.finish_dialog_title)
+            setPositiveButton(getString(R.string.dialog_confirm), null)
+        }.create()
+
         countDownTimer = object : CountDownTimer(time * 1000L, 1000) {
 
             fun String.toDoubleDigit() = if (length < 2) "0$this" else this
@@ -100,8 +106,18 @@ class TimeCountDownActivity : AppCompatActivity() {
                 }
             }
 
+            /**
+             * when time count down finish
+             *
+             * 1. stats the current data and adds it locally
+             * 2. use dialog to tell user the concentration is complete
+             *
+             * optional:
+             * - finish music
+             * - vibration
+             */
             override fun onFinish() {
-
+                finishDialog.show()
             }
         }
 
@@ -122,6 +138,12 @@ class TimeCountDownActivity : AppCompatActivity() {
             }
         }
 
+        // 在注册网络变化前，先设置为关闭，以解决网络在关闭的情况下启动 Activity 不会收到网络 callback 的问题
+        viewBinding.networkStatus.apply {
+            text = getString(R.string.network_closed)
+            setTextColor(getColor(R.color.success))
+        }
+
         connectivityManager = getSystemService(ConnectivityManager::class.java).apply {
             registerDefaultNetworkCallback(networkCallback)
         }
@@ -130,27 +152,6 @@ class TimeCountDownActivity : AppCompatActivity() {
 
         setContentView(viewBinding.root)
         countDownTimer.start()
-    }
-
-    override fun onStart() {
-        super.onStart()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            // I don't about this
-            // https://stackoverflow.com/questions/62577645/android-view-view-systemuivisibility-deprecated-what-is-the-replacement
-            window.setDecorFitsSystemWindows(false)
-        } else {
-            //  older sdk version settings
-            // https://developer.android.com/training/system-ui/immersive?hl=zh-cn
-            window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_IMMERSIVE
-                    // Set the content to appear under the system bars so that the
-                    // content doesn't resize when the system bars hide and show.
-                    or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                    // Hide the nav bar and status bar
-                    or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                    or View.SYSTEM_UI_FLAG_FULLSCREEN)
-        }
     }
 
     override fun onDestroy() {

@@ -1,6 +1,8 @@
 package com.korilin.concentration_detection.fragment.home
 
+import android.app.Activity
 import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -45,29 +47,33 @@ class ConcentrationFragment : HomeTabLayoutFragment() {
         viewModel = ViewModelProvider(this).get(ConcentrationViewModel::class.java)
     }
 
-    @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         viewBinding = FragmentConcentrationBinding.inflate(inflater)
+        val panelLauncher = registerForActivityResult(PanelResultContract()) {
+            TimeCountDownActivity.actionStart(requireActivity(), viewModel.time)
+        }
         viewBinding.startButton.apply {
             setOnClickListener {
                 if (viewModel.time == 0)
                     Toast.makeText(
-                        activity, getString(R.string.select_concentration_time_message), Toast.LENGTH_LONG
+                        activity,
+                        getString(R.string.select_concentration_time_message),
+                        Toast.LENGTH_LONG
                     ).show()
                 else {
                     try {
-                        startActivity(Intent(Settings.Panel.ACTION_INTERNET_CONNECTIVITY))
+                        panelLauncher.launch(Unit)
                     } catch (ane: ActivityNotFoundException) {
                         Toast.makeText(
                             activity,
                             getString(R.string.be_sure_concentration_settings),
                             Toast.LENGTH_LONG
                         ).show()
+                        TimeCountDownActivity.actionStart(requireActivity(), viewModel.time)
                     }
-                    TimeCountDownActivity.actionStart(requireActivity(), viewModel.time)
                 }
             }
         }
@@ -79,5 +85,17 @@ class ConcentrationFragment : HomeTabLayoutFragment() {
     companion object {
         @JvmStatic
         fun newInstance() = ConcentrationFragment()
+    }
+
+    inner class PanelResultContract : ActivityResultContract<Unit, Unit>() {
+        /** Create an intent that can be used for [Activity.startActivityForResult]  */
+        @RequiresApi(Build.VERSION_CODES.Q)
+        override fun createIntent(context: Context, input: Unit?) =
+            Intent(Settings.Panel.ACTION_INTERNET_CONNECTIVITY)
+
+
+        /** Convert result obtained from [Activity.onActivityResult] to O  */
+        override fun parseResult(resultCode: Int, intent: Intent?) = run { }
+
     }
 }

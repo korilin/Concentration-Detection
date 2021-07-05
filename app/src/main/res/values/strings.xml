@@ -16,4 +16,6 @@
     <string name="be_sure_concentration_settings">Be sure to adjust your internet, volume, and other settings!</string>
     <string name="concentration_tab_name">CONCENTRATION</string>
     <string name="statistics_tab_name">STATISTICS</string>
+    <string name="finish_dialog_title">Concentraion Finished</string>
+    <string name="dialog_confirm">ok</string>
 </resources>
