@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.korilin.concentration_detection.databinding.ActivityTimeCountDownBinding
+import com.korilin.concentration_detection.sqlite.ConcentrationSQLiteHelper
 
 const val PARAM = "time"
 
@@ -27,6 +28,8 @@ class TimeCountDownActivity : AppCompatActivity() {
     private lateinit var viewBinding: ActivityTimeCountDownBinding
     private lateinit var countDownTimer: CountDownTimer
     private lateinit var connectivityManager: ConnectivityManager
+
+    private val dbHelper = ConcentrationSQLiteHelper(this)
 
     // 用于修改 UI
     private val uiHandel = object : Handler(Looper.getMainLooper()) {
@@ -93,6 +96,8 @@ class TimeCountDownActivity : AppCompatActivity() {
             setPositiveButton(getString(R.string.dialog_confirm), null)
         }.create()
 
+
+
         countDownTimer = object : CountDownTimer(time * 1000L, 1000) {
 
             fun String.toDoubleDigit() = if (length < 2) "0$this" else this
@@ -117,6 +122,7 @@ class TimeCountDownActivity : AppCompatActivity() {
              * - vibration
              */
             override fun onFinish() {
+                dbHelper.insertRecord(time)
                 finishDialog.show()
             }
         }
