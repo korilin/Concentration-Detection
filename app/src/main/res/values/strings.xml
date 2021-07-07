@@ -16,6 +16,11 @@
     <string name="be_sure_concentration_settings">Be sure to adjust your internet, volume, and other settings!</string>
     <string name="concentration_tab_name">CONCENTRATION</string>
     <string name="statistics_tab_name">STATISTICS</string>
-    <string name="finish_dialog_title">Concentraion Finished</string>
-    <string name="dialog_confirm">ok</string>
+    <string name="finish_dialog_title">Concentration Finished</string>
+    <string name="dialog_confirm">OK</string>
+    <string name="unLockCountLabel">number of screen unlocks:</string>
+    <string name="dialog_message1">The duration of this focus is</string>
+    <string name="dialog_message2">Number of screen unlocks</string>
+    <string name="time_hour">hour</string>
+    <string name="unlock_notify_toast" >"The number of times you turn on the screen: "</string>
 </resources>

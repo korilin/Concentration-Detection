@@ -20,7 +20,8 @@ class ConcentrationSQLiteHelper(val context: Context) :
         create table $recordTableName(
             id integer primary key autoincrement,
             time text,
-            duration integer
+            duration integer,
+            unLockCount integer
         )
     """.trimIndent()
 
@@ -30,12 +31,14 @@ class ConcentrationSQLiteHelper(val context: Context) :
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        // 老爷保好
+        db.execSQL("drop table if exists $recordTableName")
+        onCreate(db)
     }
 
-    fun insertRecord(duration: Int) =
+    fun insertRecord(duration: Int, unLockCount: Int) =
         writableDatabase.insert(recordTableName, null, ContentValues().apply {
             put("time", SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date()))
             put("duration", duration)
+            put("unLockCount", unLockCount)
         })
 }

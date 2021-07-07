@@ -8,26 +8,29 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.os.*
 import android.provider.Settings
-import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import com.korilin.concentration_detection.databinding.ActivityTimeCountDownBinding
 import com.korilin.concentration_detection.sqlite.ConcentrationSQLiteHelper
 
-const val PARAM = "time"
+const val INTENT_PARAM = "time"
+
+const val BUNDLE_PARAM = "unLockCount"
 
 const val NETWORK_LOST = 10
 const val NETWORK_CONNECT = 11
 const val AIRPLANE_CLOSED = 20
 const val AIRPLANE_OPENED = 21
+const val SCREEN_UNLOCK = 30
 
 class TimeCountDownActivity : AppCompatActivity() {
 
     private lateinit var viewBinding: ActivityTimeCountDownBinding
     private lateinit var countDownTimer: CountDownTimer
     private lateinit var connectivityManager: ConnectivityManager
+
+    private var unLockCount = 0
 
     private val dbHelper = ConcentrationSQLiteHelper(this)
 
@@ -51,6 +54,7 @@ class TimeCountDownActivity : AppCompatActivity() {
                     text = getString(R.string.network_closed)
                     setTextColor(getColor(R.color.error))
                 }
+                SCREEN_UNLOCK -> viewBinding.unLockCount.text = unLockCount.toString()
             }
         }
     }
@@ -66,7 +70,6 @@ class TimeCountDownActivity : AppCompatActivity() {
         }
     }
 
-    //
     /**
      * A [Intent.ACTION_AIRPLANE_MODE_CHANGED] Receiver
      *
@@ -75,7 +78,6 @@ class TimeCountDownActivity : AppCompatActivity() {
      */
     private val airplaneReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            println(intent.action)
             if (intent.action == Intent.ACTION_AIRPLANE_MODE_CHANGED) {
                 if (intent.getBooleanExtra("state", false)) {
                     uiHandel.sendMessage(Message().apply { what = AIRPLANE_OPENED })
@@ -86,17 +88,54 @@ class TimeCountDownActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * when unlock the screen:
+     * - unlock count + 1
+     * -
+     */
+    private val userPresentReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action == Intent.ACTION_USER_PRESENT) {
+                unLockCount += 1
+                Toast.makeText(
+                    context, getString(R.string.unlock_notify_toast) + unLockCount.toString(),
+                    Toast.LENGTH_LONG
+                ).show()
+                uiHandel.sendMessage(Message().apply { what = SCREEN_UNLOCK })
+            }
+        }
+    }
+
+    private fun getTime(time: Int): String {
+        var content = ""
+        val h = time / 3600
+        val m = time % 3600 / 60
+        if (h != 0) content += h.toString() + getString(R.string.time_hour)
+        if (m != 0) content += m.toString() + getString(R.string.time_min)
+        return content
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val time = intent.getIntExtra(PARAM, 0)
+
+        unLockCount = savedInstanceState?.getInt(BUNDLE_PARAM) ?: 0
+
+        val time = intent.getIntExtra(INTENT_PARAM, 0)
         viewBinding = ActivityTimeCountDownBinding.inflate(layoutInflater)
+
+        viewBinding.unLockCount.text = unLockCount.toString()
 
         val finishDialog = AlertDialog.Builder(this).apply {
             setTitle(R.string.finish_dialog_title)
+            setMessage(
+                """
+                ${getString(R.string.dialog_message1)} ${getTime(time)}
+                
+                ${getString(R.string.dialog_message2)} : $unLockCount
+            """.trimIndent()
+            )
             setPositiveButton(getString(R.string.dialog_confirm), null)
         }.create()
-
-
 
         countDownTimer = object : CountDownTimer(time * 1000L, 1000) {
 
@@ -122,7 +161,7 @@ class TimeCountDownActivity : AppCompatActivity() {
              * - vibration
              */
             override fun onFinish() {
-                dbHelper.insertRecord(time)
+                dbHelper.insertRecord(time, unLockCount)
                 finishDialog.show()
             }
         }
@@ -154,16 +193,24 @@ class TimeCountDownActivity : AppCompatActivity() {
             registerDefaultNetworkCallback(networkCallback)
         }
 
+        // 广播注册
         registerReceiver(airplaneReceiver, IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED))
+        registerReceiver(userPresentReceiver, IntentFilter(Intent.ACTION_USER_PRESENT))
 
         setContentView(viewBinding.root)
         countDownTimer.start()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {
+        super.onSaveInstanceState(outState, outPersistentState)
+        outState.putInt(BUNDLE_PARAM, unLockCount)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         connectivityManager.unregisterNetworkCallback(networkCallback)
         unregisterReceiver(airplaneReceiver)
+        unregisterReceiver(userPresentReceiver)
     }
 
     companion object {
@@ -172,7 +219,7 @@ class TimeCountDownActivity : AppCompatActivity() {
          */
         fun actionStart(context: Context, time: Int) {
             context.startActivity(Intent(context, TimeCountDownActivity::class.java).apply {
-                putExtra(PARAM, time)
+                putExtra(INTENT_PARAM, time)
                 flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
             })
         }

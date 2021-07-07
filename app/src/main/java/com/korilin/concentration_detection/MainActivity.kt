@@ -14,7 +14,7 @@ import com.korilin.concentration_detection.fragment.home.StatisticsFragment
 val tabName = arrayOf(R.string.concentration_tab_name, R.string.statistics_tab_name)
 
 /**
- *
+ * 主页
  */
 class MainActivity : FragmentActivity() {
 

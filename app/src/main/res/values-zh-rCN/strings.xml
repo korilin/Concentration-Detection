@@ -4,10 +4,10 @@
     <string name="concentration_start">开始专注</string>
     <string name="concentration_select_title">选择专注时间</string>
     <string name="wait_image">专注图片</string>
-    <string name="airplane_mode_label">飞行模式</string>
+    <string name="airplane_mode_label">飞行模式：</string>
     <string name="airplane_mode_opened">已打开</string>
     <string name="airplane_mode_closed">已关闭</string>
-    <string name="network_status_label">网络</string>
+    <string name="network_status_label">网络：</string>
     <string name="network_connected">已连接</string>
     <string name="network_closed">未连接</string>
     <string name="time_min">分</string>
@@ -17,4 +17,11 @@
     <string name="be_sure_concentration_settings">记得调整你的网络、音量等设置哦！</string>
     <string name="concentration_tab_name">专注</string>
     <string name="statistics_tab_name">统计</string>
+    <string name="finish_dialog_title">专注完成</string>
+    <string name="dialog_confirm">确认</string>
+    <string name="unLockCountLabel">屏幕解锁次数：</string>
+    <string name="dialog_message1">本次专注的时长为</string>
+    <string name="dialog_message2">屏幕解锁次数</string>
+    <string name="time_hour">时</string>
+    <string name="unlock_notify_toast">你已打开屏幕的次数为：</string>
 </resources>
