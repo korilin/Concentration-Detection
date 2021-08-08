@@ -11,17 +11,16 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.RequiresApi
-import androidx.lifecycle.ViewModel
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import com.korilin.concentration_detection.R
 import com.korilin.concentration_detection.TimeCountDownActivity
 import com.korilin.concentration_detection.components.ConcentrationTimeSelector
 import com.korilin.concentration_detection.databinding.FragmentConcentrationBinding
-import com.korilin.concentration_detection.viewmodel.ConcentrationViewModel
+import com.korilin.concentration_detection.viewmodel.MainViewModel
 
 /**
  * A home ViewPager2 [Fragment].
@@ -39,22 +38,23 @@ import com.korilin.concentration_detection.viewmodel.ConcentrationViewModel
  */
 class ConcentrationFragment : HomeTabLayoutFragment() {
 
-    private lateinit var viewBinding: FragmentConcentrationBinding
-    private lateinit var viewModel: ConcentrationViewModel
+    override val homeTabLayoutFragmentTag = "ConcentrationFragment"
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        viewModel = ViewModelProvider(this).get(ConcentrationViewModel::class.java)
-    }
+    private lateinit var viewBinding: FragmentConcentrationBinding
+    private val viewModel: MainViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        super.onCreateView(inflater, container, savedInstanceState)
+
         viewBinding = FragmentConcentrationBinding.inflate(inflater)
+
         val panelLauncher = registerForActivityResult(PanelResultContract()) {
             TimeCountDownActivity.actionStart(requireActivity(), viewModel.time)
         }
+
         viewBinding.startButton.apply {
             setOnClickListener {
                 if (viewModel.time == 0)
@@ -72,7 +72,6 @@ class ConcentrationFragment : HomeTabLayoutFragment() {
                             getString(R.string.be_sure_concentration_settings),
                             Toast.LENGTH_LONG
                         ).show()
-                        TimeCountDownActivity.actionStart(requireActivity(), viewModel.time)
                     }
                 }
             }
@@ -87,12 +86,13 @@ class ConcentrationFragment : HomeTabLayoutFragment() {
         fun newInstance() = ConcentrationFragment()
     }
 
+
+
     inner class PanelResultContract : ActivityResultContract<Unit, Unit>() {
         /** Create an intent that can be used for [Activity.startActivityForResult]  */
         @RequiresApi(Build.VERSION_CODES.Q)
         override fun createIntent(context: Context, input: Unit?) =
             Intent(Settings.Panel.ACTION_INTERNET_CONNECTIVITY)
-
 
         /** Convert result obtained from [Activity.onActivityResult] to O  */
         override fun parseResult(resultCode: Int, intent: Intent?) = run { }

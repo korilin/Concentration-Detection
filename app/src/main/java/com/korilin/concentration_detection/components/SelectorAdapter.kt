@@ -8,7 +8,7 @@ import android.widget.Button
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.korilin.concentration_detection.R
-import com.korilin.concentration_detection.viewmodel.ConcentrationViewModel
+import com.korilin.concentration_detection.viewmodel.MainViewModel
 
 data class SelectorItem(
     var value: Int,
@@ -28,7 +28,7 @@ fun Button.buttonSetSelected() {
 
 class SelectorAdapter(
     private val selectorList: List<SelectorItem>,
-    private var viewModel: ConcentrationViewModel
+    private var viewModel: MainViewModel
 ) : RecyclerView.Adapter<SelectorAdapter.ViewHolder>() {
 
     private var selected: Button? = null

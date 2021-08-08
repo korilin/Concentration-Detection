@@ -1,4 +1,4 @@
-package com.korilin.concentration_detection.sqlite
+ package com.korilin.concentration_detection.sqlite
 
 import android.content.ContentValues
 import android.content.Context
@@ -9,7 +9,7 @@ import android.util.Log
 import java.util.*
 
 const val databaseName = "Concentration.DB"
-const val databaseVersion = 20210705
+const val databaseVersion = 20210707
 
 class ConcentrationSQLiteHelper(val context: Context) :
     SQLiteOpenHelper(context, databaseName, null, databaseVersion) {
@@ -41,4 +41,24 @@ class ConcentrationSQLiteHelper(val context: Context) :
             put("duration", duration)
             put("unLockCount", unLockCount)
         })
+
+    fun selectRecords(): List<Record> {
+        val cursor = readableDatabase.rawQuery("select * from $recordTableName", null)
+        val mutableListOf = mutableListOf<Record>()
+        if (cursor.moveToFirst()) {
+            do {
+                Record(
+                    cursor.getInt(cursor.getColumnIndex("id")),
+                    cursor.getString(cursor.getColumnIndex("time")),
+                    cursor.getInt(cursor.getColumnIndex("duration")),
+                    cursor.getInt(cursor.getColumnIndex("unLockCount")),
+                ).also {
+                    mutableListOf.add(it)
+                }
+
+            } while (cursor.moveToNext())
+        }
+        cursor.close()
+        return mutableListOf.apply { reverse() }
+    }
 }

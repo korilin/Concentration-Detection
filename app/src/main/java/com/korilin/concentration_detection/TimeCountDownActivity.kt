@@ -1,22 +1,22 @@
 package com.korilin.concentration_detection
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.net.ConnectivityManager
 import android.net.Network
 import android.os.*
 import android.provider.Settings
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.korilin.concentration_detection.databinding.ActivityTimeCountDownBinding
 import com.korilin.concentration_detection.sqlite.ConcentrationSQLiteHelper
+import com.korilin.concentration_detection.viewmodel.MainViewModel
 
 const val INTENT_PARAM = "time"
 
 const val BUNDLE_PARAM = "unLockCount"
+const val BUNDLE_TIME_UNTIL = "timeUntil"
 
 const val NETWORK_LOST = 10
 const val NETWORK_CONNECT = 11
@@ -24,15 +24,28 @@ const val AIRPLANE_CLOSED = 20
 const val AIRPLANE_OPENED = 21
 const val SCREEN_UNLOCK = 30
 
+const val TIME_CHANGE = 40
+const val TIME_FINISH = 41
+
 class TimeCountDownActivity : AppCompatActivity() {
 
     private lateinit var viewBinding: ActivityTimeCountDownBinding
-    private lateinit var countDownTimer: CountDownTimer
     private lateinit var connectivityManager: ConnectivityManager
-
-    private var unLockCount = 0
+    private val viewModel: MainViewModel by viewModels()
 
     private val dbHelper = ConcentrationSQLiteHelper(this)
+    private var time = 0
+
+    private val connection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            val binder = service as TimeCountDownService.TCDBinder
+            binder.start(viewModel.timeUntil, uiHandel)
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+
+        }
+    }
 
     // 用于修改 UI
     private val uiHandel = object : Handler(Looper.getMainLooper()) {
@@ -54,7 +67,35 @@ class TimeCountDownActivity : AppCompatActivity() {
                     text = getString(R.string.network_closed)
                     setTextColor(getColor(R.color.error))
                 }
-                SCREEN_UNLOCK -> viewBinding.unLockCount.text = unLockCount.toString()
+                SCREEN_UNLOCK -> viewBinding.unLockCount.text = viewModel.unLockCount.toString()
+                TIME_CHANGE -> {
+                    viewModel.timeUntil = msg.arg1
+                    viewBinding.timeCountDownText.text = msg.arg1.let {
+                        val h = "${it / 3600}".toDoubleDigit()
+                        val m = "${it % 3600 / 60}".toDoubleDigit()
+                        val s = "${it % 3600 % 60}".toDoubleDigit()
+                        "$h : $m : $s"
+                    }
+                }
+                TIME_FINISH -> if (viewModel.timeUntil == 0) {
+                    dbHelper.insertRecord(time, viewModel.unLockCount)
+                    AlertDialog.Builder(this@TimeCountDownActivity).apply {
+                        setTitle(R.string.finish_dialog_title)
+                        setMessage(
+                            """
+                                ${getString(R.string.dialog_message1)} ${getTime(time)}
+                                
+                                ${getString(R.string.dialog_message2)} : ${viewModel.unLockCount}
+                            """.trimIndent()
+                        )
+                        setPositiveButton(
+                            getString(R.string.dialog_confirm)
+                        ) { dialog, _ ->
+                            dialog.dismiss()
+                            finish()
+                        }
+                    }.create().show()
+                }
             }
         }
     }
@@ -91,14 +132,14 @@ class TimeCountDownActivity : AppCompatActivity() {
     /**
      * when unlock the screen:
      * - unlock count + 1
-     * -
      */
     private val userPresentReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == Intent.ACTION_USER_PRESENT) {
-                unLockCount += 1
+                viewModel.unLockCount += 1
                 Toast.makeText(
-                    context, getString(R.string.unlock_notify_toast) + unLockCount.toString(),
+                    context,
+                    getString(R.string.unlock_notify_toast) + viewModel.unLockCount.toString(),
                     Toast.LENGTH_LONG
                 ).show()
                 uiHandel.sendMessage(Message().apply { what = SCREEN_UNLOCK })
@@ -117,54 +158,12 @@ class TimeCountDownActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        unLockCount = savedInstanceState?.getInt(BUNDLE_PARAM) ?: 0
-
-        val time = intent.getIntExtra(INTENT_PARAM, 0)
         viewBinding = ActivityTimeCountDownBinding.inflate(layoutInflater)
+        setContentView(viewBinding.root)
+        time = intent.getIntExtra(INTENT_PARAM, 0)
+        if (viewModel.timeUntil == 0) viewModel.timeUntil = time
 
-        viewBinding.unLockCount.text = unLockCount.toString()
-
-        val finishDialog = AlertDialog.Builder(this).apply {
-            setTitle(R.string.finish_dialog_title)
-            setMessage(
-                """
-                ${getString(R.string.dialog_message1)} ${getTime(time)}
-                
-                ${getString(R.string.dialog_message2)} : $unLockCount
-            """.trimIndent()
-            )
-            setPositiveButton(getString(R.string.dialog_confirm), null)
-        }.create()
-
-        countDownTimer = object : CountDownTimer(time * 1000L, 1000) {
-
-            fun String.toDoubleDigit() = if (length < 2) "0$this" else this
-
-            override fun onTick(millisUntilFinished: Long) {
-                viewBinding.timeCountDownText.text = (millisUntilFinished / 1000).let {
-                    val h = "${it / 3600}".toDoubleDigit()
-                    val m = "${it % 3600 / 60}".toDoubleDigit()
-                    val s = "${it % 3600 % 60}".toDoubleDigit()
-                    "$h : $m : $s"
-                }
-            }
-
-            /**
-             * when time count down finish
-             *
-             * 1. stats the current data and adds it locally
-             * 2. use dialog to tell user the concentration is complete
-             *
-             * optional:
-             * - finish music
-             * - vibration
-             */
-            override fun onFinish() {
-                dbHelper.insertRecord(time, unLockCount)
-                finishDialog.show()
-            }
-        }
+        viewBinding.unLockCount.text = viewModel.unLockCount.toString()
 
         /**
          * Because [airplaneReceiver] could not receive the airplane state at the beginning of the registration,
@@ -175,10 +174,10 @@ class TimeCountDownActivity : AppCompatActivity() {
 
         viewBinding.flyModeStatus.apply {
             if (airplaneModeStatus == 0) {
-                text = getString(R.string.airplane_mode_opened)
+                text = getString(R.string.airplane_mode_closed)
                 setTextColor(getColor(R.color.error))
             } else {
-                text = getString(R.string.airplane_mode_closed)
+                text = getString(R.string.airplane_mode_opened)
                 setTextColor(getColor(R.color.success))
             }
         }
@@ -197,13 +196,18 @@ class TimeCountDownActivity : AppCompatActivity() {
         registerReceiver(airplaneReceiver, IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED))
         registerReceiver(userPresentReceiver, IntentFilter(Intent.ACTION_USER_PRESENT))
 
-        setContentView(viewBinding.root)
-        countDownTimer.start()
+        val serviceIntent = Intent(this, TimeCountDownService::class.java)
+        bindService(
+            serviceIntent,
+            connection,
+            Context.BIND_AUTO_CREATE
+        )
     }
 
     override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {
         super.onSaveInstanceState(outState, outPersistentState)
-        outState.putInt(BUNDLE_PARAM, unLockCount)
+        outState.putInt(BUNDLE_PARAM, viewModel.unLockCount)
+        outState.putInt(BUNDLE_TIME_UNTIL, viewModel.timeUntil)
     }
 
     override fun onDestroy() {
@@ -211,6 +215,7 @@ class TimeCountDownActivity : AppCompatActivity() {
         connectivityManager.unregisterNetworkCallback(networkCallback)
         unregisterReceiver(airplaneReceiver)
         unregisterReceiver(userPresentReceiver)
+        unbindService(connection)
     }
 
     companion object {

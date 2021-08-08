@@ -24,4 +24,6 @@
     <string name="dialog_message2">屏幕解锁次数</string>
     <string name="time_hour">时</string>
     <string name="unlock_notify_toast">你已打开屏幕的次数为：</string>
+    <string name="completeTimeLabel">完成时间：</string>
+    <string name="concentration_record">专注记录</string>
 </resources>

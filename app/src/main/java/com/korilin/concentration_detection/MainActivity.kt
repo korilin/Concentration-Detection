@@ -1,7 +1,7 @@
 package com.korilin.concentration_detection
 
-import android.content.Context
 import android.os.Bundle
+import androidx.activity.viewModels
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
@@ -10,6 +10,7 @@ import com.google.android.material.tabs.TabLayoutMediator
 import com.korilin.concentration_detection.databinding.ActivityMainBinding
 import com.korilin.concentration_detection.fragment.home.ConcentrationFragment
 import com.korilin.concentration_detection.fragment.home.StatisticsFragment
+import com.korilin.concentration_detection.viewmodel.MainViewModel
 
 val tabName = arrayOf(R.string.concentration_tab_name, R.string.statistics_tab_name)
 
@@ -22,6 +23,7 @@ class MainActivity : FragmentActivity() {
 
     private lateinit var homeTabLayout: TabLayout
     private lateinit var homeViewPager: ViewPager2
+    private val viewModel : MainViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

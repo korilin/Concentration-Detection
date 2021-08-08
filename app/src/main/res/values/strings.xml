@@ -23,4 +23,6 @@
     <string name="dialog_message2">Number of screen unlocks</string>
     <string name="time_hour">hour</string>
     <string name="unlock_notify_toast" >"The number of times you turn on the screen: "</string>
+    <string name="completeTimeLabel">completion time:</string>
+    <string name="concentration_record">Concentration Record</string>
 </resources>

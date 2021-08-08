@@ -3,18 +3,18 @@ package com.korilin.concentration_detection.components
 import android.app.TimePickerDialog
 import android.graphics.Rect
 import android.os.Bundle
-import android.text.format.DateFormat
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.korilin.concentration_detection.R
 import com.korilin.concentration_detection.databinding.ConcentrationTimeSelectorBinding
 import com.korilin.concentration_detection.fragment.home.ConcentrationFragment
-import com.korilin.concentration_detection.viewmodel.ConcentrationViewModel
+import com.korilin.concentration_detection.viewmodel.MainViewModel
 
 /**
  * 这是一个时间选择器
@@ -40,7 +40,7 @@ class ConcentrationTimeSelector : Fragment() {
      *
      * [https://stackoverflow.com/questions/59952673/how-to-get-an-instance-of-viewmodel-in-activity-in-2020-21]
      */
-    private val viewModel: ConcentrationViewModel by viewModels(ownerProducer = { requireParentFragment() })
+    private val viewModel: MainViewModel by activityViewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
