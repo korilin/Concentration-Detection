@@ -197,6 +197,7 @@ class TimeCountDownActivity : AppCompatActivity() {
         registerReceiver(userPresentReceiver, IntentFilter(Intent.ACTION_USER_PRESENT))
 
         val serviceIntent = Intent(this, TimeCountDownService::class.java)
+        startService(serviceIntent)
         bindService(
             serviceIntent,
             connection,
@@ -208,6 +209,15 @@ class TimeCountDownActivity : AppCompatActivity() {
         super.onSaveInstanceState(outState, outPersistentState)
         outState.putInt(BUNDLE_PARAM, viewModel.unLockCount)
         outState.putInt(BUNDLE_TIME_UNTIL, viewModel.timeUntil)
+    }
+
+    override fun onBackPressed() {
+        val alertDialog = AlertDialog.Builder(this)
+            .setMessage(R.string.dialog_message3)
+            .setPositiveButton(R.string.dialog_confirm) { _, _ -> super.onBackPressed() }
+            .setNegativeButton(R.string.cancel) { _, _ -> }
+            .create()
+        alertDialog.show()
     }
 
     override fun onDestroy() {

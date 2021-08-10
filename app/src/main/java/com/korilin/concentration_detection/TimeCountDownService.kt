@@ -42,7 +42,7 @@ class TimeCountDownService : Service() {
         manager.createNotificationChannel(channel)
 
         val pendingIntent = Intent(this, TimeCountDownActivity::class.java).let {
-            PendingIntent.getActivity(this, 0, it, 0)
+            PendingIntent.getActivity(this, 0, it, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_CANCEL_CURRENT)
         }
         val notification = NotificationCompat.Builder(this, TimeCountDownService::class.java.name)
             .setContentTitle(getText(R.string.app_name))
