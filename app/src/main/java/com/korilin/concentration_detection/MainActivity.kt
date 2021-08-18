@@ -1,6 +1,7 @@
 package com.korilin.concentration_detection
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.viewModels
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -27,6 +28,8 @@ class MainActivity : FragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        Log.d("MainActivity", "Thread = ${Thread.currentThread().name}")
 
         viewBinding = ActivityMainBinding.inflate(layoutInflater).also {
             homeTabLayout = it.homeTableLayout

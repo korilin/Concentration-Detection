@@ -5,6 +5,7 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.os.*
 import android.provider.Settings
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
@@ -39,7 +40,8 @@ class TimeCountDownActivity : AppCompatActivity() {
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             val binder = service as TimeCountDownService.TCDBinder
-            binder.start(viewModel.timeUntil, uiHandel)
+            binder.start(viewModel.timeUntil, uiHandler)
+            Log.d("onServiceConnected", "Thread = ${Thread.currentThread().name}")
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
@@ -48,8 +50,9 @@ class TimeCountDownActivity : AppCompatActivity() {
     }
 
     // 用于修改 UI
-    private val uiHandel = object : Handler(Looper.getMainLooper()) {
+    private val uiHandler = object : Handler(Looper.getMainLooper()) {
         override fun handleMessage(msg: Message) {
+            Log.d("uiHandler", "Thread = ${Thread.currentThread().name}")
             when (msg.what) {
                 NETWORK_CONNECT -> viewBinding.networkStatus.apply {
                     text = getString(R.string.network_connected)
@@ -103,11 +106,11 @@ class TimeCountDownActivity : AppCompatActivity() {
     // network listener
     private val networkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
-            uiHandel.sendMessage(Message().apply { what = NETWORK_CONNECT })
+            uiHandler.sendMessage(Message().apply { what = NETWORK_CONNECT })
         }
 
         override fun onLost(network: Network) {
-            uiHandel.sendMessage(Message().apply { what = NETWORK_LOST })
+            uiHandler.sendMessage(Message().apply { what = NETWORK_LOST })
         }
     }
 
@@ -121,9 +124,9 @@ class TimeCountDownActivity : AppCompatActivity() {
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == Intent.ACTION_AIRPLANE_MODE_CHANGED) {
                 if (intent.getBooleanExtra("state", false)) {
-                    uiHandel.sendMessage(Message().apply { what = AIRPLANE_OPENED })
+                    uiHandler.sendMessage(Message().apply { what = AIRPLANE_OPENED })
                 } else {
-                    uiHandel.sendMessage(Message().apply { what = AIRPLANE_CLOSED })
+                    uiHandler.sendMessage(Message().apply { what = AIRPLANE_CLOSED })
                 }
             }
         }
@@ -142,7 +145,7 @@ class TimeCountDownActivity : AppCompatActivity() {
                     getString(R.string.unlock_notify_toast) + viewModel.unLockCount.toString(),
                     Toast.LENGTH_LONG
                 ).show()
-                uiHandel.sendMessage(Message().apply { what = SCREEN_UNLOCK })
+                uiHandler.sendMessage(Message().apply { what = SCREEN_UNLOCK })
             }
         }
     }
@@ -158,6 +161,8 @@ class TimeCountDownActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d("TimeCountDownActivity", "Thread = ${Thread.currentThread().name}")
+
         viewBinding = ActivityTimeCountDownBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
         time = intent.getIntExtra(INTENT_PARAM, 0)
